@@ -13,4 +13,4 @@ type yaml =
   | Collection of yaml list
   | Structure of (yaml * yaml) list
 
-external load : string -> yaml = "test"
+val load : string -> yaml
