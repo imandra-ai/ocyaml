@@ -1,0 +1,17 @@
+opam-version: "1.2"
+name: "ocyaml"
+version: "0.1.0.0"
+maintainer: "Konstantin Kanishchev <kostya@aestheticintegration.com>"
+authors: "Konstantin Kanishchev <kostya@aestheticintegration.com>"
+homepage: "https://github.com/AestheticIntegration/public/tree/master/ocyaml"
+bug-reports: "https://github.com/AestheticIntegration/public/issues"
+license: "Apache 2.0"
+dev-repo: "git@github.com:AestheticIntegration/public.git"
+build: [
+  [make]
+]
+install: [make "install"]
+remove: ["ocamlfind" "remove" "ocyaml"]
+depends: [
+  "ocamlfind" {build}
+]

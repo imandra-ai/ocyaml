@@ -1,0 +1,4 @@
+description = "Parse YAML files with libyaml"
+version = "0.1.0.0"
+archive(byte) = "ocyaml.cma"
+archive(native) = "ocyaml.cmxa"

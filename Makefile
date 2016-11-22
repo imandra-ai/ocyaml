@@ -1,18 +1,24 @@
-all: ocyaml.cmi ocyaml.cma 
+all: ocyaml.cmi ocyaml.cma
 
-ocyaml.cma: ocyaml.cmo ocyaml.o 
+ocyaml.cma: ocyaml.cmo ocyaml.o
 	ocamlmklib -o ocyaml ocyaml.cmo ocyaml.o -lyaml
 
 .SUFFIXES: .ml .mli .cmi .cmo .cmx .o
 
-.ml.cmo: 
-	ocamlc -c $< 
+.ml.cmo:
+	ocamlc -c $<
 
 .mli.cmi:
-	ocamlc -c $< 
+	ocamlc -c $<
 
 .c.o:
-	ocamlc -c $< 
+	ocamlc -c $<
 
 clean:
-	rm *.cmo *.cmi
+	rm *.cmo *.cmi *.o *.a *.so *.cma
+
+install:
+	ocamlfind install ocyaml META *.a *.cma *.cmi *.cmo *.o *.so
+
+uninstall:
+	ocamlfind remove ocyaml
