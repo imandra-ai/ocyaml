@@ -106,7 +106,7 @@ let rec parse_sequence p =
             entry :: scan ()
         | token  -> failwith ("Unexpected YAML token in sequence: " ^ string_of_token token)
         in
-    Collection ( scan () |> List.rev )
+    Collection ( scan () )
 
 and parse_sequence_flow p =
     (* In a flow sequence, we expect one entry before the first entry token. *)
@@ -122,7 +122,7 @@ and parse_sequence_flow p =
               entry :: scan ()
           | token  -> failwith ("Unexpected YAML token in flow sequence: " ^ string_of_token token)
           in
-      Collection ( first_entry :: (scan () |> List.rev) )
+      Collection ( first_entry :: scan () )
 
 and parse_mapping p =
     let rec scan key () = match next_token p, key with
