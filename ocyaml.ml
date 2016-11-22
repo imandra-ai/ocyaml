@@ -67,6 +67,30 @@ type token =
     | YAML_TAG_TOKEN of string * string
     | YAML_SCALAR_TOKEN of scalar_style * string
 
+let string_of_token = function
+  | YAML_NO_TOKEN -> "YAML_NO_TOKEN"
+  | YAML_STREAM_START_TOKEN _ -> "YAML_STREAM_START_TOKEN _"
+  | YAML_STREAM_END_TOKEN -> "YAML_STREAM_END_TOKEN"
+  | YAML_VERSION_DIRECTIVE_TOKEN (_,_) -> "YAML_VERSION_DIRECTIVE_TOKEN (_,_)"
+  | YAML_TAG_DIRECTIVE_TOKEN (_,_) -> "YAML_TAG_DIRECTIVE_TOKEN (_,_)"
+  | YAML_DOCUMENT_START_TOKEN -> "YAML_DOCUMENT_START_TOKEN"
+  | YAML_DOCUMENT_END_TOKEN -> "YAML_DOCUMENT_END_TOKEN"
+  | YAML_BLOCK_SEQUENCE_START_TOKEN -> "YAML_BLOCK_SEQUENCE_START_TOKEN"
+  | YAML_BLOCK_MAPPING_START_TOKEN -> "YAML_BLOCK_MAPPING_START_TOKEN"
+  | YAML_BLOCK_END_TOKEN -> "YAML_BLOCK_END_TOKEN"
+  | YAML_FLOW_SEQUENCE_START_TOKEN -> "YAML_FLOW_SEQUENCE_START_TOKEN"
+  | YAML_FLOW_SEQUENCE_END_TOKEN -> "YAML_FLOW_SEQUENCE_END_TOKEN"
+  | YAML_FLOW_MAPPING_START_TOKEN -> "YAML_FLOW_MAPPING_START_TOKEN"
+  | YAML_FLOW_MAPPING_END_TOKEN -> "YAML_FLOW_MAPPING_END_TOKEN"
+  | YAML_BLOCK_ENTRY_TOKEN -> "YAML_BLOCK_ENTRY_TOKEN"
+  | YAML_FLOW_ENTRY_TOKEN -> "YAML_FLOW_ENTRY_TOKEN"
+  | YAML_KEY_TOKEN -> "YAML_KEY_TOKEN"
+  | YAML_VALUE_TOKEN -> "YAML_VALUE_TOKEN"
+  | YAML_ALIAS_TOKEN _ -> "YAML_ALIAS_TOKEN _"
+  | YAML_ANCHOR_TOKEN _ -> "YAML_ANCHOR_TOKEN _"
+  | YAML_TAG_TOKEN (_,_) -> "YAML_TAG_TOKEN (_,_)"
+  | YAML_SCALAR_TOKEN (_,_) -> "YAML_SCALAR_TOKEN (_,_)"
+
 type yaml_parser
 external open_parser  : string -> yaml_parser = "open_parser"
 external close_parser : yaml_parser -> unit = "close_parser"
@@ -80,9 +104,25 @@ let rec parse_sequence p =
         | YAML_BLOCK_ENTRY_TOKEN ->
             let entry = parse_yaml (next_token p) p in
             entry :: scan ()
-        | _  -> failwith "Unexpected YAML token in sequence"
+        | token  -> failwith ("Unexpected YAML token in sequence: " ^ string_of_token token)
         in
     Collection ( scan () |> List.rev )
+
+and parse_sequence_flow p =
+    (* In a flow sequence, we expect one entry before the first entry token. *)
+    match next_token p with
+    | YAML_FLOW_SEQUENCE_END_TOKEN -> Collection []
+    | token ->
+      let first_entry = parse_yaml token p in
+      let rec scan () =
+          match next_token p  with
+          | YAML_FLOW_SEQUENCE_END_TOKEN -> []
+          | YAML_FLOW_ENTRY_TOKEN ->
+              let entry = parse_yaml (next_token p) p in
+              entry :: scan ()
+          | token  -> failwith ("Unexpected YAML token in flow sequence: " ^ string_of_token token)
+          in
+      Collection ( first_entry :: (scan () |> List.rev) )
 
 and parse_mapping p =
     let rec scan key () = match next_token p, key with
@@ -96,7 +136,7 @@ and parse_mapping p =
         | YAML_BLOCK_END_TOKEN, Some _ -> failwith "Unmatched key token."
         | YAML_KEY_TOKEN,       Some _ -> failwith "Two key tokens in a row."
         | YAML_VALUE_TOKEN,     None   -> failwith "Value token without a key"
-        | _ , _ -> failwith "Unexpected YAML token in mapping"
+        | token , _ -> failwith ("Unexpected YAML token in mapping: " ^ string_of_token token)
         in
     Structure ( scan None () |> List.rev )
 
@@ -104,6 +144,7 @@ and parse_yaml token p =
     match token  with
     | YAML_STREAM_START_TOKEN _ -> parse_yaml (next_token p) p
     | YAML_BLOCK_SEQUENCE_START_TOKEN -> parse_sequence p
+    | YAML_FLOW_SEQUENCE_START_TOKEN -> parse_sequence_flow p
     | YAML_BLOCK_MAPPING_START_TOKEN  -> parse_mapping p
     | YAML_SCALAR_TOKEN ( _ , v ) -> Scalar v
     | YAML_NO_TOKEN ->  begin
@@ -111,7 +152,7 @@ and parse_yaml token p =
             | YAML_NO_ERROR, _ , _ -> failwith "Unexpected end of YAML stream"
             | _ , errmsg, ctx -> failwith ("YAML parsing error: " ^ errmsg ^ ". Context: " ^ ctx)
         end
-    | _ -> failwith "Unexpected YAML token"
+    | _ -> failwith ("Unexpected YAML token: " ^ string_of_token token)
 
 let load filename =
     let p = open_parser filename in
