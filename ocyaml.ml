@@ -90,7 +90,7 @@ let string_of_token = function
   | YAML_ALIAS_TOKEN _ -> "YAML_ALIAS_TOKEN _"
   | YAML_ANCHOR_TOKEN _ -> "YAML_ANCHOR_TOKEN _"
   | YAML_TAG_TOKEN (_,_) -> "YAML_TAG_TOKEN (_,_)"
-  | YAML_SCALAR_TOKEN (_,_) -> "YAML_SCALAR_TOKEN (_,_)"
+  | YAML_SCALAR_TOKEN (_,string) -> "YAML_SCALAR_TOKEN (_," ^ string ^ ")"
 
 type yaml_parser
 external open_parser  : string -> yaml_parser = "open_parser"
@@ -126,20 +126,27 @@ and parse_sequence_flow p =
       Collection ( first_entry :: scan () )
 
 and parse_mapping p =
-    let rec scan key () = match next_token p, key with
+    let rec scan key token = match token, key with
         | YAML_BLOCK_END_TOKEN, None -> []
         | YAML_KEY_TOKEN,       None ->
-            let key   = parse_yaml (next_token p) p in
-            scan (Some key) ()
-        | YAML_VALUE_TOKEN,     Some key ->
-            let value = parse_yaml (next_token p) p in
-            ( key, value)  :: scan None ()
+            let key = parse_yaml (next_token p) p in
+            scan (Some key) (next_token p)
+        | YAML_VALUE_TOKEN,     Some key -> scan_value key
         | YAML_BLOCK_END_TOKEN, Some _ -> failwith "Unmatched key token."
         | YAML_KEY_TOKEN,       Some _ -> failwith "Two key tokens in a row."
         | YAML_VALUE_TOKEN,     None   -> failwith "Value token without a key"
         | token , _ -> failwith ("Unexpected YAML token in mapping: " ^ string_of_token token)
-        in
-    Structure ( scan None () |> List.rev )
+    and scan_value key =
+      (match next_token p with
+       | YAML_KEY_TOKEN
+       | YAML_BLOCK_END_TOKEN as token ->
+         (* No value -> Scalar "" *)
+         (key, Scalar "") :: scan None token
+       | token ->
+         let value = parse_yaml token p in
+         ( key, value)  :: scan None (next_token p))
+    in
+    Structure ( scan None (next_token p) )
 
 and parse_yaml token p =
     match token  with
