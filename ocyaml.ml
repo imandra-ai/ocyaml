@@ -6,6 +6,7 @@
 (*                                                                     *)
 (* Contributors:                                                       *)
 (* Konstantin kanishchev (kostya@aestheticintegration.com)             *)
+(* Matt Bray (matt@aestheticintegration.com)                           *)
 (*                                                                     *)
 
 type yaml =

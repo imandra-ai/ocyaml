@@ -6,10 +6,11 @@
 (*                                                                     *)
 (* Contributors:                                                       *)
 (* Konstantin kanishchev (kostya@aestheticintegration.com)             *)
+(* Matt Bray (matt@aestheticintegration.com)                           *)
 (*                                                                     *)
 
 type yaml =
-    Scalar of string
+  | Scalar of string
   | Collection of yaml list
   | Structure of (yaml * yaml) list
 
