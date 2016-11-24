@@ -15,3 +15,8 @@ remove: ["ocamlfind" "remove" "ocyaml"]
 depends: [
   "ocamlfind" {build}
 ]
+depexts: [
+  [ ["ubuntu"]   ["libyaml-dev"] ]
+  [ ["debian"]   ["libyaml-dev"] ]
+  [ ["homebrew"] ["libyaml"]     ]
+]
