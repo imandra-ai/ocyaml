@@ -1,24 +1,24 @@
+artifacts = *.a *.cma *.cmi *.cmo *.cmx *.cmxa *.o *.so
+
 all: ocyaml.cmi ocyaml.cma
 
 ocyaml.cma: ocyaml.cmo ocyaml.o
-	ocamlmklib -o ocyaml ocyaml.cmo ocyaml.o -lyaml
+	ocamlmklib -o ocyaml -lyaml $^
 
-.SUFFIXES: .ml .mli .cmi .cmo .cmx .o
-
-.ml.cmo:
+%.cmo: %.ml
 	ocamlc -c $<
 
-.mli.cmi:
+%.cmi: %.mli
 	ocamlc -c $<
 
-.c.o:
+%.o: %.c
 	ocamlc -c $<
 
 clean:
-	rm *.cmo *.cmi *.o *.a *.so *.cma
+	rm $(wildcard $(artifacts))
 
 install:
-	ocamlfind install ocyaml META *.a *.cma *.cmi *.cmo *.o *.so
+	ocamlfind install ocyaml META $(wildcard $(artifacts))
 
 uninstall:
 	ocamlfind remove ocyaml
