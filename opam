@@ -3,10 +3,10 @@ name: "ocyaml"
 version: "0.1.0.0"
 maintainer: "Konstantin Kanishchev <kostya@aestheticintegration.com>"
 authors: "Konstantin Kanishchev <kostya@aestheticintegration.com>, Matt Bray <matt@aestheticintegration.com>"
-homepage: "https://github.com/AestheticIntegration/public/tree/master/ocyaml"
-bug-reports: "https://github.com/AestheticIntegration/public/issues"
+homepage: "https://github.com/AestheticIntegration/ocyaml"
+bug-reports: "https://github.com/AestheticIntegration/ocyaml/issues"
 license: "Apache 2.0"
-dev-repo: "git@github.com:AestheticIntegration/public.git"
+dev-repo: "git@github.com:AestheticIntegration/ocyaml.git"
 build: [
   [make]
 ]
