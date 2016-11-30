@@ -18,5 +18,6 @@ depends: [
 depexts: [
   [ ["ubuntu"]   ["libyaml-dev"] ]
   [ ["debian"]   ["libyaml-dev"] ]
-  [ ["homebrew"] ["libyaml"]     ]
+  [ ["osx" "macports"] ["libyaml"] ]
+  [ ["osx" "homebrew"] ["libyaml"] ]
 ]
