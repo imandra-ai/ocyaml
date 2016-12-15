@@ -17,8 +17,12 @@ type yaml =
 let rec equal yaml1 yaml2 =
   match (yaml1, yaml2) with
   | (Scalar s1, Scalar s2) -> String.equal s1 s2
-  | (Collection l1, Collection l2) -> List.for_all2 (fun y1 y2 -> equal y1 y2) l1 l2
-  | (Structure a1, Structure a2) -> List.for_all2 (fun (k1, v1) (k2, v2) -> equal k1 k2 && equal v1 v2) a1 a2
+  | (Collection l1, Collection l2) ->
+    (try List.for_all2 (fun y1 y2 -> equal y1 y2) l1 l2 with
+     | Invalid_argument _ -> false)
+  | (Structure a1, Structure a2) ->
+    (try List.for_all2 (fun (k1, v1) (k2, v2) -> equal k1 k2 && equal v1 v2) a1 a2 with
+     | Invalid_argument _ -> false)
   | _ -> false
 
 (** Many bad things could happen with the parser and emitter. *)
