@@ -16,4 +16,5 @@ let () =
   Pkg.describe ~build ~opams "ocyaml" @@ fun c ->
   Ok [ Pkg.clib "src/libocyaml_stubs.clib"
      ; Pkg.mllib "src/ocyaml.mllib"
+     ; Pkg.test ~dir:"src" "test/main"
      ]

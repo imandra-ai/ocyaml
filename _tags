@@ -5,3 +5,5 @@ true : bin_annot
 <src/ocyaml_stubs.c>    : pkg-config(yaml-0.1)
 <src/ocyaml.{cma,cmxa}> : link_stubs(src/libocyaml_stubs), pkg-config(yaml-0.1)
 <src/libocyaml_stubs.a> : pkg-config(yaml-0.1)
+
+<test/**> : package(kaputt), link_stubs(src/libocyaml_stubs), pkg-config(yaml-0.1)

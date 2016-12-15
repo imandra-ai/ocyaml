@@ -15,6 +15,7 @@ depends: [
   "ocamlbuild" {build}
   "ocb-stubblr" {build}
   "topkg" {build}
+  "kaputt" {test}
 ]
 depexts: [
   [ ["ubuntu"]   ["libyaml-dev"] ]

@@ -1,4 +1,4 @@
-all: lint build
+all: lint build test
 
 lint:
 	topkg lint
@@ -8,6 +8,10 @@ build:
 
 clean:
 	topkg clean
+
+.PHONY: test
+test:
+	topkg test
 
 install:
 	opam pin add . --no-action
