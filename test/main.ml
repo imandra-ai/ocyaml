@@ -19,6 +19,21 @@ let () =
               [ "some_things:"
               ; "- first"
               ; "- second"
+              ])
+    ~expected:Ocyaml.(
+        Structure
+          [ ( Scalar "some_things"
+            , Collection
+                [ Scalar "first"; Scalar "second" ]
+            )
+          ]
+      );
+
+  add_test "structure_collection_no_indent_followed_by_key.yaml"
+    ~input:(String.concat "\n"
+              [ "some_things:"
+              ; "- first"
+              ; "- second"
               ; "some_indented_things:"
               ; "  - first"
               ; "  - second"

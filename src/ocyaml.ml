@@ -105,62 +105,74 @@ external close_parser : yaml_parser -> unit = "close_parser"
 external next_token   : yaml_parser -> token = "next_token"
 external get_error    : yaml_parser -> (yaml_error_type * string * string) = "get_error"
 
-let rec parse_sequence p =
-    let rec scan () =
-        match next_token p  with
-        | YAML_BLOCK_END_TOKEN -> []
+(* Uncomment to debug. *)
+(* let next_token parser = *)
+(*   let token = next_token_ parser in *)
+(*   print_endline (string_of_token token); token *)
+
+let rec parse_sequence token ?(exit_on = [YAML_BLOCK_END_TOKEN]) p =
+    let rec scan token =
+        match token with
+        | _ when List.exists (fun t -> t = token) exit_on -> ([], token)
         | YAML_BLOCK_ENTRY_TOKEN ->
             let entry = parse_yaml (next_token p) p in
-            entry :: scan ()
-        | token  -> failwith ("Unexpected YAML token in sequence: " ^ string_of_token token)
+            let (other_entries, exit_token) = scan (next_token p) in
+            (entry :: other_entries, exit_token)
+        | _  -> failwith ("Unexpected YAML token in sequence: " ^ string_of_token token)
         in
-    Collection ( scan () )
+    let (list, exit_token) = scan token in
+    (Collection list, exit_token)
 
-and parse_sequence_flow p =
+and parse_sequence_flow token p =
     (* In a flow sequence, we expect one entry before the first entry token. *)
-    match next_token p with
+    match token with
     | YAML_FLOW_SEQUENCE_END_TOKEN -> Collection []
-    | token ->
+    | _ ->
       let first_entry = parse_yaml token p in
-      let rec scan () =
-          match next_token p  with
+      let rec scan token =
+          match token  with
           | YAML_FLOW_SEQUENCE_END_TOKEN -> []
           | YAML_FLOW_ENTRY_TOKEN ->
               let entry = parse_yaml (next_token p) p in
-              entry :: scan ()
+              entry :: scan (next_token p)
           | token  -> failwith ("Unexpected YAML token in flow sequence: " ^ string_of_token token)
           in
-      Collection ( first_entry :: scan () )
+      Collection ( first_entry :: scan (next_token p) )
 
-and parse_mapping p =
+and parse_mapping token p =
     let rec scan key token = match token, key with
         | YAML_BLOCK_END_TOKEN, None -> []
         | YAML_KEY_TOKEN,       None ->
             let key = parse_yaml (next_token p) p in
             scan (Some key) (next_token p)
-        | YAML_VALUE_TOKEN,     Some key -> scan_value key
+        | YAML_VALUE_TOKEN,     Some key -> scan_value key (next_token p)
         | YAML_BLOCK_END_TOKEN, Some _ -> failwith "Unmatched key token."
         | YAML_KEY_TOKEN,       Some _ -> failwith "Two key tokens in a row."
         | YAML_VALUE_TOKEN,     None   -> failwith "Value token without a key"
         | token , _ -> failwith ("Unexpected YAML token in mapping: " ^ string_of_token token)
-    and scan_value key =
-      (match next_token p with
+    and scan_value key token =
+      (match token with
        | YAML_KEY_TOKEN
-       | YAML_BLOCK_END_TOKEN as token ->
+       | YAML_BLOCK_END_TOKEN ->
          (* No value -> Scalar "" *)
          (key, Scalar "") :: scan None token
-       | token ->
+       | YAML_BLOCK_ENTRY_TOKEN ->
+         (* The value is a non-indented sequence. *)
+         let (value, sequence_exit_token) =
+           parse_sequence token p ~exit_on:[ YAML_KEY_TOKEN; YAML_BLOCK_END_TOKEN ] in
+         ( key, value)  :: scan None sequence_exit_token
+       | _ ->
          let value = parse_yaml token p in
          ( key, value)  :: scan None (next_token p))
     in
-    Structure ( scan None (next_token p) )
+    Structure ( scan None token )
 
 and parse_yaml token p =
-    match token  with
+    match token with
     | YAML_STREAM_START_TOKEN _ -> parse_yaml (next_token p) p
-    | YAML_BLOCK_SEQUENCE_START_TOKEN -> parse_sequence p
-    | YAML_FLOW_SEQUENCE_START_TOKEN -> parse_sequence_flow p
-    | YAML_BLOCK_MAPPING_START_TOKEN  -> parse_mapping p
+    | YAML_BLOCK_SEQUENCE_START_TOKEN -> fst (parse_sequence (next_token p) p)
+    | YAML_FLOW_SEQUENCE_START_TOKEN -> parse_sequence_flow (next_token p) p
+    | YAML_BLOCK_MAPPING_START_TOKEN  -> parse_mapping (next_token p) p
     | YAML_SCALAR_TOKEN ( _ , v ) -> Scalar v
     | YAML_NO_TOKEN ->  begin
         match get_error p with
