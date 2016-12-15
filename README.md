@@ -12,3 +12,10 @@ opam pin add ocyaml https://github.com/AestheticIntegration/ocyaml.git --no-acti
 opam depext ocyaml
 opam install ocyaml
 ```
+
+## Develop
+
+```
+make install-deps
+make
+```

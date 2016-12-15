@@ -13,9 +13,12 @@ clean:
 test:
 	topkg test
 
-install:
+install-deps:
 	opam pin add . --no-action
 	opam depext ocyaml
+	opam install ocyaml --deps-only
+
+install: install-deps
 	opam install ocyaml
 
 uninstall:
