@@ -145,7 +145,9 @@ and parse_sequence_flow token p =
 
 and parse_mapping token p =
     let rec scan key token = match token, key with
+        | YAML_FLOW_MAPPING_END_TOKEN, None
         | YAML_BLOCK_END_TOKEN, None -> []
+        | YAML_FLOW_ENTRY_TOKEN, None -> scan key (next_token p)
         | YAML_KEY_TOKEN,       None ->
             let key = parse_yaml (next_token p) p in
             scan (Some key) (next_token p)
@@ -176,6 +178,7 @@ and parse_yaml token p =
     | YAML_STREAM_START_TOKEN _ -> parse_yaml (next_token p) p
     | YAML_BLOCK_SEQUENCE_START_TOKEN -> fst (parse_sequence (next_token p) p)
     | YAML_FLOW_SEQUENCE_START_TOKEN -> parse_sequence_flow (next_token p) p
+    | YAML_FLOW_MAPPING_START_TOKEN
     | YAML_BLOCK_MAPPING_START_TOKEN  -> parse_mapping (next_token p) p
     | YAML_SCALAR_TOKEN ( _ , v ) -> Scalar v
     | YAML_NO_TOKEN ->  begin

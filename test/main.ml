@@ -51,4 +51,39 @@ let () =
           ]
       );
 
+  add_test "flow_structure.yaml"
+    ~input:(String.concat "\n"
+              [ "{ hello: world }"
+              ])
+    ~expected:Ocyaml.(
+        Structure
+          [ ( Scalar "hello"
+            , Scalar "world"
+            )
+          ]
+      );
+
+  add_test "flow_structure_empty.yaml"
+    ~input:(String.concat "\n"
+              [ "{}"
+              ])
+    ~expected:Ocyaml.(
+        Structure []
+      );
+
+  add_test "flow_structure_multiple_keys.yaml"
+    ~input:(String.concat "\n"
+              [ "{ hello: world, a: 1 }"
+              ])
+    ~expected:Ocyaml.(
+        Structure
+          [ ( Scalar "hello"
+            , Scalar "world"
+            )
+          ; ( Scalar "a"
+            , Scalar "1"
+            )
+          ]
+      );
+
   Test.launch_tests ()
