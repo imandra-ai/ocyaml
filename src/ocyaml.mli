@@ -15,3 +15,5 @@ type yaml =
   | Structure of (yaml * yaml) list
 
 val load : string -> yaml
+
+val equal : yaml -> yaml -> bool

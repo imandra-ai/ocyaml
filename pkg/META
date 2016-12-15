@@ -1,4 +1,7 @@
 description = "Parse YAML files with libyaml"
 version = "0.1.0.0"
+requires = ""
 archive(byte) = "ocyaml.cma"
 archive(native) = "ocyaml.cmxa"
+plugin(byte) = "ocyaml.cma"
+plugin(native) = "ocyaml.cmxs"

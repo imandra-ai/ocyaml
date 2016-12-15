@@ -1,6 +1,2 @@
-*.a
-*.cma
-*.cmi
-*.cmo
-*.o
-*.so
+_build
+ocyaml.install

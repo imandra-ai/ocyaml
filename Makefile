@@ -1,24 +1,18 @@
-artifacts = *.a *.cma *.cmi *.cmo *.cmx *.cmxa *.o *.so
+all: lint build
 
-all: ocyaml.cmi ocyaml.cma
+lint:
+	topkg lint
 
-ocyaml.cma: ocyaml.cmo ocyaml.o
-	ocamlmklib -o ocyaml -lyaml $^
-
-%.cmo: %.ml
-	ocamlc -c $<
-
-%.cmi: %.mli
-	ocamlc -c $<
-
-%.o: %.c
-	ocamlc -c $<
+build:
+	topkg build
 
 clean:
-	rm $(wildcard $(artifacts))
+	topkg clean
 
 install:
-	ocamlfind install ocyaml META $(wildcard $(artifacts))
+	opam pin add . --no-action
+	opam depext ocyaml
+	opam install ocyaml
 
 uninstall:
-	ocamlfind remove ocyaml
+	opam remove ocyaml

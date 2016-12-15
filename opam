@@ -8,12 +8,13 @@ bug-reports: "https://github.com/AestheticIntegration/ocyaml/issues"
 license: "Apache 2.0"
 dev-repo: "git@github.com:AestheticIntegration/ocyaml.git"
 build: [
-  [make]
+  "ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%"
 ]
-install: [make "install"]
-remove: ["ocamlfind" "remove" "ocyaml"]
 depends: [
   "ocamlfind" {build}
+  "ocamlbuild" {build}
+  "ocb-stubblr" {build}
+  "topkg" {build}
 ]
 depexts: [
   [ ["ubuntu"]   ["libyaml-dev"] ]
