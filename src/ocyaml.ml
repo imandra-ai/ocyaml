@@ -188,8 +188,17 @@ and parse_yaml token p =
         end
     | _ -> failwith ("Unexpected YAML token: " ^ string_of_token token)
 
+let run_parser p =
+  let yaml =
+    try parse_yaml (next_token p) p
+    with exn ->
+      (try close_parser p with close_exn -> raise close_exn);
+      raise exn
+  in
+  close_parser p;
+  yaml
+
 let load filename =
-    let p = open_parser filename in
-    let yaml = parse_yaml (next_token p) p in
-    let () = close_parser p in
-    yaml
+  let p = open_parser filename in
+  let yaml = run_parser p in
+  yaml
