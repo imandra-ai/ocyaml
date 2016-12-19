@@ -34,7 +34,7 @@ typedef struct parser_state_s {
 
 #define Pstate_val(v) (*((parser_state_t **) Data_custom_val(v)))
 
-CAMLprim 
+CAMLprim
 value open_parser(value v1){
     CAMLparam1(v1);
     CAMLlocal1(res);
@@ -57,11 +57,11 @@ value open_parser(value v1){
     CAMLreturn(res);
 }
 
-CAMLprim 
+CAMLprim
 value close_parser(value v1){
     CAMLparam1(v1);
     parser_state_t * pstate = Pstate_val(v1);
-    
+
     yaml_parser_delete(pstate->parser);
     fclose(pstate->fh);
 
@@ -73,10 +73,10 @@ value close_parser(value v1){
 
 int getEncodingCaseNumber(yaml_encoding_t e){
     switch(e) {
-        case YAML_ANY_ENCODING:     return 0; 
-        case YAML_UTF8_ENCODING:    return 1; 
-        case YAML_UTF16LE_ENCODING: return 2; 
-        case YAML_UTF16BE_ENCODING: return 3; 
+        case YAML_ANY_ENCODING:     return 0;
+        case YAML_UTF8_ENCODING:    return 1;
+        case YAML_UTF16LE_ENCODING: return 2;
+        case YAML_UTF16BE_ENCODING: return 3;
         default: return 0;
     }
 }
@@ -123,14 +123,14 @@ int getTokenCaseNumber(yaml_token_type_t type){
 }
 
 
-CAMLprim 
+CAMLprim
 value next_token(value v1){
     CAMLparam1(v1);
     CAMLlocal2(res,local);
 
     parser_state_t * pstate = Pstate_val(v1);
 
-    yaml_token_t  token;   
+    yaml_token_t  token;
     yaml_parser_scan(pstate->parser, &token);
 
     switch(token.type) {
@@ -143,7 +143,7 @@ value next_token(value v1){
             Store_field(res, 0, Val_int(token.data.version_directive.major));
             Store_field(res, 1, Val_int(token.data.version_directive.minor));
             break;
-        case YAML_TAG_DIRECTIVE_TOKEN: //  of string * string   
+        case YAML_TAG_DIRECTIVE_TOKEN: //  of string * string
             res = caml_alloc(1, getTokenCaseNumber(token.type));
             Store_field(res, 0, caml_copy_string(token.data.tag_directive.handle));
             Store_field(res, 1, caml_copy_string(token.data.tag_directive.prefix));
@@ -188,7 +188,7 @@ int getErrorCase( yaml_error_type_t err) {
 }
 
 
-CAMLprim 
+CAMLprim
 value get_error(value v1){
     CAMLparam1(v1);
     CAMLlocal1(res);
@@ -198,6 +198,6 @@ value get_error(value v1){
     Store_field(res, 0, Val_int(getErrorCase(pstate->parser->error)));
     Store_field(res, 1, caml_copy_string(pstate->parser->problem));
     Store_field(res, 2, caml_copy_string(pstate->parser->context));
-    
+
     CAMLreturn(res);
 }
