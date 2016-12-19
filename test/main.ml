@@ -1,7 +1,7 @@
 open Kaputt
 open Ocyaml
 
-let add_test name ~input ~expected =
+let add_test_file name ~input ~expected =
   Test.add_simple_test
     ~title:name
     (fun () ->
@@ -10,11 +10,19 @@ let add_test name ~input ~expected =
        output_string out_channel input;
        close_out out_channel;
        let actual =
-         Ocyaml.load filename in
+         Ocyaml.of_file filename in
+       Assertion.equal ~eq:Ocyaml.equal expected actual)
+
+let add_test name ~input ~expected =
+  Test.add_simple_test
+    ~title:name
+    (fun () ->
+       let actual =
+         Ocyaml.of_string input in
        Assertion.equal ~eq:Ocyaml.equal expected actual)
 
 let () =
-  add_test "structure_collection_no_indent.yaml"
+  add_test_file "structure_collection_no_indent.yaml"
     ~input:(String.concat "\n"
               [ "some_things:"
               ; "- first"

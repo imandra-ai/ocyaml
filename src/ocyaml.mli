@@ -14,6 +14,7 @@ type yaml =
   | Collection of yaml list
   | Structure of (yaml * yaml) list
 
-val load : string -> yaml
+val of_file : string -> yaml
+val of_string : string -> yaml
 
 val equal : yaml -> yaml -> bool

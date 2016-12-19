@@ -14,7 +14,7 @@ test:
 	topkg test
 
 install-deps:
-	opam pin add . --no-action
+	opam pin add . --no-action --yes
 	opam depext ocyaml
 	opam install ocyaml --deps-only
 

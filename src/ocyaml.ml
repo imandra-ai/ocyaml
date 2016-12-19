@@ -105,6 +105,7 @@ let string_of_token = function
 
 type yaml_parser
 external open_parser  : string -> yaml_parser = "open_parser"
+external open_string_parser  : string -> yaml_parser = "open_string_parser"
 external close_parser : yaml_parser -> unit = "close_parser"
 external next_token   : yaml_parser -> token = "next_token"
 external get_error    : yaml_parser -> (yaml_error_type * string * string) = "get_error"
@@ -198,7 +199,12 @@ let run_parser p =
   close_parser p;
   yaml
 
-let load filename =
+let of_file filename =
   let p = open_parser filename in
+  let yaml = run_parser p in
+  yaml
+
+let of_string yaml_string =
+  let p = open_string_parser yaml_string in
   let yaml = run_parser p in
   yaml

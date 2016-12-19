@@ -6,6 +6,7 @@
 /*                                                                     */
 /* Contributors:                                                       */
 /* Konstantin kanishchev (kostya@aestheticintegration.com)             */
+/* Matt Bray (matt@aestheticintegration.com)                           */
 /*                                                                     */
 
 #include <caml/mlvalues.h>
@@ -58,12 +59,37 @@ value open_parser(value v1){
 }
 
 CAMLprim
+value open_string_parser(value v1){
+  CAMLparam1(v1);
+  CAMLlocal1(res);
+
+  const char *input = String_val(v1);
+  size_t length = strlen(input);
+
+  parser_state_t * pstate = (parser_state_t *) malloc(sizeof(parser_state_t));
+  pstate->fh = NULL;
+  pstate->parser = (yaml_parser_t *) malloc(sizeof(yaml_parser_t));
+
+  if(!yaml_parser_initialize(pstate->parser))
+    fputs("Failed to initialize parser!\n", stderr);
+
+  yaml_parser_set_input_string(pstate->parser, input, length);
+
+  res = caml_alloc_custom( &yaml_custom_ops, sizeof(pstate), 0, 1 );
+  Pstate_val(res) = pstate;
+
+  CAMLreturn(res);
+}
+
+CAMLprim
 value close_parser(value v1){
     CAMLparam1(v1);
     parser_state_t * pstate = Pstate_val(v1);
 
     yaml_parser_delete(pstate->parser);
-    fclose(pstate->fh);
+    if(pstate->fh != NULL) {
+      fclose(pstate->fh);
+    }
 
     free((void *)pstate->parser);
     free((void *)pstate);
